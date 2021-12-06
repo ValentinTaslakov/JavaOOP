@@ -1,5 +1,7 @@
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import rpg_lab.Hero;
 import rpg_lab.Target;
 import rpg_lab.Weapon;
@@ -9,51 +11,34 @@ public class heroTest {
     private static final int TARGET_XP = 100;
     private static final String HERO_NAME = "Name";
 
+    private Hero hero;
+
+
+    @Before
+    public void setUp() {
+        Weapon mock = Mockito.mock(Weapon.class);
+        this.hero = new Hero("Thor", mock);
+    }
+
     @Test
-    public void testHeroGainsXPWhenTargetDies(){
-        Weapon weapon = new Weapon() {
-            @Override
-            public int getAttackPoints() {
-                return 0;
-            }
+    public void testHeroGainsXPWhenTargetDies() {
+        Target mockedTarget = Mockito.mock(Target.class);
 
-            @Override
-            public int getDurabilityPoints() {
-                return 10;
-            }
+        Mockito.when(mockedTarget.isDead()).thenReturn(true);
+        Mockito.when(mockedTarget.giveExperience()).thenReturn(100);
 
-            @Override
-            public void attack(Target target) {
+        this.hero.attack(mockedTarget);
 
-            }
-        };
+        Assert.assertEquals(TARGET_XP, hero.getExperience());
+    }
 
-        Target target = new Target() {
-            @Override
-            public int getHealth() {
-                return 0;
-            }
+    @Test
+    public void testUponTargetAttackWhileTargetIsStillAliveHeroGetsNoXP() {
+        Target mockedTarget = Mockito.mock(Target.class);
+        Mockito.when(mockedTarget.isDead()).thenReturn(true);
 
-            @Override
-            public void takeAttack(int attackPoints) {
+        this.hero.attack(mockedTarget);
 
-            }
-
-            @Override
-            public int giveExperience() {
-                return TARGET_XP;
-            }
-
-            @Override
-            public boolean isDead() {
-                return true;
-            }
-        };
-
-        Hero hero = new Hero(HERO_NAME,weapon);
-
-        hero.attack(target);
-
-        Assert.assertEquals(TARGET_XP,hero.getExperience());
+        Assert.assertEquals(0, hero.getExperience());
     }
 }
